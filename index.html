@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thoughtful Automation - Package Sorting System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .stack-card {
+            transition: all 0.3s ease;
+        }
+        .stack-card:hover {
+            transform: translateY(-2px);
+        }
+        .result-animation {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .input-group:focus-within {
+            transform: scale(1.02);
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">📦 Package Sorting System</h1>
+            <p class="text-gray-600">Thoughtful Automation - Robotic Dispatch System</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-white rounded-xl shadow-2xl p-8 mb-6">
+            <!-- Input Form -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Package Dimensions</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Width -->
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Width (cm)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="width" 
+                            step="0.1" 
+                            min="0"
+                            placeholder="e.g., 100"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        >
+                    </div>
+
+                    <!-- Height -->
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Height (cm)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="height" 
+                            step="0.1" 
+                            min="0"
+                            placeholder="e.g., 100"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        >
+                    </div>
+
+                    <!-- Length -->
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Length (cm)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="length" 
+                            step="0.1" 
+                            min="0"
+                            placeholder="e.g., 100"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        >
+                    </div>
+
+                    <!-- Mass -->
+                    <div class="input-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Mass (kg)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="mass" 
+                            step="0.1" 
+                            min="0"
+                            placeholder="e.g., 15"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        >
+                    </div>
+                </div>
+
+                <!-- Sort Button -->
+                <button 
+                    onclick="sortPackage()"
+                    class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-105 active:scale-95"
+                >
+                    Sort Package 🚀
+                </button>
+            </div>
+
+            <!-- Result Display -->
+            <div id="resultContainer" class="hidden result-animation">
+                <div class="border-t pt-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Sorting Result</h3>
+                    
+                    <!-- Result Stack Card -->
+                    <div id="resultCard" class="p-6 rounded-lg mb-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Dispatch to Stack:</p>
+                                <p id="stackResult" class="text-3xl font-bold"></p>
+                            </div>
+                            <div id="stackIcon" class="text-6xl"></div>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Volume:</span>
+                            <span id="volumeResult" class="font-semibold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Bulky:</span>
+                            <span id="bulkyResult" class="font-semibold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Heavy:</span>
+                            <span id="heavyResult" class="font-semibold"></span>
+                        </div>
+                        <div id="bulkyReasonContainer" class="hidden mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-sm text-gray-600 mb-1">Bulky Reason:</p>
+                            <p id="bulkyReason" class="text-sm font-medium text-blue-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="errorContainer" class="hidden mt-4">
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Standard -->
+            <div class="stack-card bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h4 class="font-bold text-green-800 mb-1">STANDARD</h4>
+                    <p class="text-xs text-green-700">Not bulky or heavy</p>
+                </div>
+            </div>
+
+            <!-- Special -->
+            <div class="stack-card bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">⚠️</div>
+                    <h4 class="font-bold text-yellow-800 mb-1">SPECIAL</h4>
+                    <p class="text-xs text-yellow-700">Bulky OR heavy</p>
+                </div>
+            </div>
+
+            <!-- Rejected -->
+            <div class="stack-card bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">❌</div>
+                    <h4 class="font-bold text-red-800 mb-1">REJECTED</h4>
+                    <p class="text-xs text-red-700">Bulky AND heavy</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Sorting Rules</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+                <li class="flex items-start">
+                    <span class="mr-2">📏</span>
+                    <span><strong>Bulky:</strong> Volume ≥ 1,000,000 cm³ OR any dimension ≥ 150 cm</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="mr-2">⚖️</span>
+                    <span><strong>Heavy:</strong> Mass ≥ 20 kg</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function sortPackage() {
+            // Get input values
+            const width = parseFloat(document.getElementById('width').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const length = parseFloat(document.getElementById('length').value);
+            const mass = parseFloat(document.getElementById('mass').value);
+
+            // Hide previous results
+            document.getElementById('resultContainer').classList.add('hidden');
+            document.getElementById('errorContainer').classList.add('hidden');
+
+            // Validate inputs
+            if (isNaN(width) || isNaN(height) || isNaN(length) || isNaN(mass)) {
+                showError('Please fill in all fields with valid numbers');
+                return;
+            }
+
+            if (width < 0 || height < 0 || length < 0 || mass < 0) {
+                showError('All values must be non-negative');
+                return;
+            }
+
+            // Calculate locally (client-side for demo)
+            const volume = width * height * length;
+            const isBulky = volume >= 1_000_000 || width >= 150 || height >= 150 || length >= 150;
+            const isHeavy = mass >= 20;
+            
+            let result;
+            if (isBulky && isHeavy) {
+                result = 'REJECTED';
+            } else if (isBulky || isHeavy) {
+                result = 'SPECIAL';
+            } else {
+                result = 'STANDARD';
+            }
+
+            // Get bulky reason
+            let bulkyReason = null;
+            if (isBulky) {
+                const reasons = [];
+                if (volume >= 1_000_000) {
+                    reasons.push(`Volume: ${volume.toLocaleString('en-US', {maximumFractionDigits: 0})} cm³ ≥ 1,000,000 cm³`);
+                }
+                if (width >= 150) reasons.push(`Width: ${width} cm ≥ 150 cm`);
+                if (height >= 150) reasons.push(`Height: ${height} cm ≥ 150 cm`);
+                if (length >= 150) reasons.push(`Length: ${length} cm ≥ 150 cm`);
+                bulkyReason = reasons.join(' | ');
+            }
+
+            // Display result
+            displayResult({
+                result: result,
+                details: {
+                    volume: volume,
+                    is_bulky: isBulky,
+                    is_heavy: isHeavy,
+                    bulky_reason: bulkyReason
+                }
+            });
+        }
+
+        function displayResult(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultCard = document.getElementById('resultCard');
+            const stackResult = document.getElementById('stackResult');
+            const stackIcon = document.getElementById('stackIcon');
+            const volumeResult = document.getElementById('volumeResult');
+            const bulkyResult = document.getElementById('bulkyResult');
+            const heavyResult = document.getElementById('heavyResult');
+            const bulkyReasonContainer = document.getElementById('bulkyReasonContainer');
+            const bulkyReason = document.getElementById('bulkyReason');
+
+            // Set result text and styling
+            stackResult.textContent = data.result;
+
+            if (data.result === 'STANDARD') {
+                resultCard.className = 'p-6 rounded-lg mb-4 bg-green-100 border-2 border-green-300';
+                stackResult.className = 'text-3xl font-bold text-green-800';
+                stackIcon.textContent = '✅';
+            } else if (data.result === 'SPECIAL') {
+                resultCard.className = 'p-6 rounded-lg mb-4 bg-yellow-100 border-2 border-yellow-300';
+                stackResult.className = 'text-3xl font-bold text-yellow-800';
+                stackIcon.textContent = '⚠️';
+            } else {
+                resultCard.className = 'p-6 rounded-lg mb-4 bg-red-100 border-2 border-red-300';
+                stackResult.className = 'text-3xl font-bold text-red-800';
+                stackIcon.textContent = '❌';
+            }
+
+            // Set details
+            volumeResult.textContent = `${data.details.volume.toLocaleString('en-US', {maximumFractionDigits: 0})} cm³`;
+            bulkyResult.textContent = data.details.is_bulky ? '✓ Yes' : '✗ No';
+            bulkyResult.className = data.details.is_bulky ? 'font-semibold text-yellow-600' : 'font-semibold text-gray-600';
+            heavyResult.textContent = data.details.is_heavy ? '✓ Yes' : '✗ No';
+            heavyResult.className = data.details.is_heavy ? 'font-semibold text-orange-600' : 'font-semibold text-gray-600';
+
+            // Show bulky reason if applicable
+            if (data.details.bulky_reason) {
+                bulkyReason.textContent = data.details.bulky_reason;
+                bulkyReasonContainer.classList.remove('hidden');
+            } else {
+                bulkyReasonContainer.classList.add('hidden');
+            }
+
+            // Show result
+            resultContainer.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorContainer.classList.remove('hidden');
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sortPackage();
+            }
+        });
+    </script>
+</body>
+</html>
